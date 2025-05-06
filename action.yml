@@ -1,0 +1,72 @@
+name: "Platform Application Manifest Dispatch"
+description: "Dispatches a repository event to update application manifests with Docker image digests"
+author: "Jimmie Fulton <jimmie.fulton@gmail.com>"
+
+# Define the inputs for this action
+inputs:
+  repository:
+    description: "The repository name in owner/repo format"
+    required: true
+  directory-name:
+    description: "The directory name for the application in the manifest repository"
+    required: true
+  resource-directory-name:
+    description: "The resource directory name where the application is located"
+    required: true
+  image-name:
+    description: "The name of the Docker image"
+    required: true
+  environment-dir:
+    description: "The environment directory (e.g., dev, stage, prod)"
+    required: true
+    default: "dev"
+  digest:
+    description: "The Docker image digest to update"
+    required: true
+  update-manifest-token:
+    description: "Token used to update image manifests"
+    required: true
+  platform-dispatch-url:
+    description: "URL to dispatch platform updates to"
+    required: true
+
+# Define the outputs for this action
+outputs:
+  status:
+    description: "The status of the dispatch request"
+    value: ${{ steps.dispatch.outputs.status }}
+
+# Define the runs configuration
+runs:
+  using: "composite"
+  steps:
+    - name: Dispatch Update Image Digest
+      id: dispatch
+      shell: bash
+      run: |
+        echo "Triggering Update Image Digest..."
+        echo "Repository: ${{ inputs.repository }}"
+        echo "Image digest: ${{ inputs.digest }}"
+        
+        # Send the repository dispatch event
+        HTTP_STATUS=$(curl -X POST \
+          -H "Accept: application/vnd.github.everest-preview+json" \
+          -H "Authorization: token ${{ inputs.update-manifest-token }}" \
+          ${{ inputs.platform-dispatch-url }} \
+          --fail-with-body \
+          -d "{\"event_type\": \"update-digest\", \"client_payload\": {\"repository\": \"${{ inputs.repository }}\", \"directory_name\": \"${{ inputs.directory-name }}\", \"resource_directory_name\": \"${{ inputs.resource-directory-name }}\", \"image_name\": \"${{ inputs.image-name }}\", \"environment_dir\": \"${{ inputs.environment-dir }}\", \"digest\": \"${{ inputs.digest }}\"}}" \
+          -s -o /dev/null -w "%{http_code}")
+        
+        if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
+          echo "status=success" >> $GITHUB_OUTPUT
+          echo "Successfully dispatched update digest event"
+        else
+          echo "status=failed" >> $GITHUB_OUTPUT
+          echo "Failed to dispatch update digest event, status code: $HTTP_STATUS"
+          exit 1
+        fi
+
+# Define the branding for the action in the GitHub Marketplace
+branding:
+  icon: "refresh-cw"
+  color: "blue"
