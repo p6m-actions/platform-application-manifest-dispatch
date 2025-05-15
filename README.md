@@ -17,6 +17,7 @@ deployment configurations.
   with:
     repository: ${{ github.repository }}
     image-name: "my-application"
+    directory-name: $(basename ${GITHUB_REPOSITORY})
     environment: "dev"
     digest: ${{ steps.build-image.outputs.digest }}
     update-manifest-token: ${{ secrets.UPDATE_MANIFEST_TOKEN }}
@@ -33,6 +34,7 @@ deployment configurations.
 | `digest`                | The Docker image digest to update                   | Yes      |         |
 | `update-manifest-token` | Token used to update image manifests                | Yes      |         |
 | `platform-dispatch-url` | URL to dispatch platform updates to                 | Yes      |         |
+| `directory-name`        | Directory name .platform/kubernetes/`directory-name`| Yes      |         |
 
 ## Outputs
 
@@ -77,6 +79,7 @@ jobs:
         with:
           repository: ${{ github.repository }}
           image-name: "my-application"
+          directory-name: $(basename ${GITHUB_REPOSITORY})
           environment: "dev"
           digest: ${{ steps.build-image.outputs.digest }}
           update-manifest-token: ${{ secrets.UPDATE_MANIFEST_TOKEN }}

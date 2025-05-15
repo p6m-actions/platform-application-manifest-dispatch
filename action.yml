@@ -10,6 +10,9 @@ inputs:
   image-name:
     description: "The name of the Docker image"
     required: true
+  directory-name:
+    description: "Directory name for ./platform repo path /kubernetes/directory-name"
+    required: true
   environment:
     description: "The deployment environment (e.g., dev, stage, prod)"
     required: true
@@ -40,6 +43,7 @@ runs:
       run: |
         echo "Triggering Update Image Digest..."
         echo "Repository: ${{ inputs.repository }}"
+        echo "Directory Name: ${{ inputs.directory-name }}"
         echo "Image name: ${{ inputs.image-name }}"
         echo "Environment: ${{ inputs.environment }}"
         echo "Image digest: ${{ inputs.digest }}"
@@ -50,7 +54,7 @@ runs:
           -H "Authorization: token ${{ inputs.update-manifest-token }}" \
           ${{ inputs.platform-dispatch-url }} \
           --fail-with-body \
-          -d "{\"event_type\": \"update-digest\", \"client_payload\": {\"repository\": \"${{ inputs.repository }}\", \"image_name\": \"${{ inputs.image-name }}\", \"environment\": \"${{ inputs.environment }}\", \"digest\": \"${{ inputs.digest }}\"}}" \
+          -d "{\"event_type\": \"update-digest\", \"client_payload\": {\"repository\": \"${{ inputs.repository }}\", \"directory_name\": \"${{ inputs.directory-name }}\", \"image_name\": \"${{ inputs.image-name }}\", \"environment\": \"${{ inputs.environment }}\", \"digest\": \"${{ inputs.digest }}\"}}" \
           -s -o /dev/null -w "%{http_code}")
         
         if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
