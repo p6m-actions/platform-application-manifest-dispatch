@@ -54,7 +54,7 @@ runs:
           -H "Authorization: token ${{ inputs.update-manifest-token }}" \
           ${{ inputs.platform-dispatch-url }} \
           --fail-with-body \
-          -d "{\"event_type\": \"update-digest\", \"client_payload\": {\"repository\": \"${{ inputs.repository }}\", \"directory_name\": \"${{ inputs.directory-name }}\", \"image_name\": \"${{ inputs.image-name }}\", \"environment\": \"${{ inputs.environment }}\", \"digest\": \"${{ inputs.digest }}\"}}" \
+          -d "{\"event_type\": \"update-digest\", \"client_payload\": {\"repository\": \"${{ inputs.repository }}\", \"directory_name\": \"${{ inputs.directory-name }}\", \"image_name\": \"${{ inputs.image-name }}\", \"environment_dir\": \"${{ inputs.environment }}\", \"digest\": \"${{ inputs.digest }}\"}}" \
           -s -o /dev/null -w "%{http_code}")
         
         if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
