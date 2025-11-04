@@ -55,7 +55,7 @@ runs:
           ${{ inputs.platform-dispatch-url }} \
           -d "{\"event_type\": \"update-digest\", \"client_payload\": {\"repository\": \"${{ inputs.repository }}\", \"directory_name\": \"${{ inputs.directory-name }}\", \"image_name\": \"${{ inputs.image-name }}\", \"environment_dir\": \"${{ inputs.environment }}\", \"digest\": \"${{ inputs.digest }}\"}}")
         
-        STATUS_CODE=$(echo "$RESPONSE" | jq '.status')
+        STATUS=$(echo "$RESPONSE" | jq '.status')
         MESSAGE=$(echo "$RESPONSE" | jq '.message')
         if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 300 ]; then
           echo "status=success" >> $GITHUB_OUTPUT
