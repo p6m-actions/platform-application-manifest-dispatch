@@ -53,7 +53,6 @@ runs:
           -H "Accept: application/vnd.github.everest-preview+json" \
           -H "Authorization: token ${{ inputs.update-manifest-token }}" \
           ${{ inputs.platform-dispatch-url }} \
-          --fail-with-body \
           -d "{\"event_type\": \"update-digest\", \"client_payload\": {\"repository\": \"${{ inputs.repository }}\", \"directory_name\": \"${{ inputs.directory-name }}\", \"image_name\": \"${{ inputs.image-name }}\", \"environment_dir\": \"${{ inputs.environment }}\", \"digest\": \"${{ inputs.digest }}\"}}" \
           -s -o /dev/null -w "%{http_code}")
         
