@@ -57,23 +57,23 @@ runs:
         
         STATUS=$(echo "$RESPONSE" | jq '.status')
         MESSAGE=$(echo "$RESPONSE" | jq '.message')
-        if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 300 ]; then
-          echo "status=success" >> $GITHUB_OUTPUT
-          echo "Successfully dispatched update digest event"
-          echo "$MESSAGE"
-        else
+        if [ -n "$STATUS" ] && [ "$STATUS" -ge 400 ]; then
           echo "status=failed" >> $GITHUB_OUTPUT
           echo "Failed to dispatch update digest event, status code: $STATUS"
           echo "$MESSAGE"
           exit 1
         fi
 
+        # If the response suceeded, the Github api does not return any content for this HTTP request.
+        echo "status=success" >> $GITHUB_OUTPUT
+        echo "Successfully dispatched update digest event"
+
 # Define the branding for the action in the GitHub Marketplace
 branding:
   icon: "refresh-cw"
   color: "blue"
 
-# Sample Github api response
+# Sample Github api error response
 # {
 #   "message": "API rate limit exceeded for installation ID 91288596. If you reach out to GitHub Support for help, please include the request ID DCE1:2AC128:500DB9E:15F60B6D:690A0FA7 and timestamp 2025-11-04 14:37:27 UTC. For more on scraping GitHub and how it may affect your rights, please review our Terms of Service (https://docs.github.com/en/site-policy/github-terms/github-terms-of-service)",
 #   "documentation_url": "https://docs.github.com/rest/overview/rate-limits-for-the-rest-api",
