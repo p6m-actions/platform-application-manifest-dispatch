@@ -27,7 +27,7 @@ inputs:
     description: "URL to dispatch platform updates to"
     required: true
   registry:
-    description: "The Docker registry (default, ecr, or empty)"
+    description: "The Docker registry (default, ecr, or other)"
     required: false
     default: 'default'
 
