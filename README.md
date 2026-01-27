@@ -26,15 +26,16 @@ deployment configurations.
 
 ## Inputs
 
-| Name                    | Description                                         | Required | Default |
-| ----------------------- | --------------------------------------------------- | -------- | ------- |
-| `repository`            | The repository name in owner/repo format            | Yes      |         |
-| `image-name`            | The name of the Docker image                        | Yes      |         |
-| `environment`           | The deployment environment (e.g., dev, stage, prod) | Yes      | `dev`   |
-| `digest`                | The Docker image digest to update                   | Yes      |         |
-| `update-manifest-token` | Token used to update image manifests                | Yes      |         |
-| `platform-dispatch-url` | URL to dispatch platform updates to                 | Yes      |         |
-| `directory-name`        | Directory name .platform/kubernetes/`directory-name`| Yes      |         |
+| Name                    | Description                                         | Required | Default     |
+| ----------------------- | --------------------------------------------------- | -------- | ----------- |
+| `repository`            | The repository name in owner/repo format            | Yes      |             |
+| `image-name`            | The name of the Docker image                        | Yes      |             |
+| `environment`           | The deployment environment (e.g., dev, stage, prod) | Yes      | `dev`       |
+| `digest`                | The Docker image digest to update                   | Yes      |             |
+| `update-manifest-token` | Token used to update image manifests                | Yes      |             |
+| `platform-dispatch-url` | URL to dispatch platform updates to                 | Yes      |             |
+| `directory-name`        | Directory name .platform/kubernetes/`directory-name`| Yes      |             |
+| `registry`              | The Docker registry (default, ecr, or other). If 'other' then 'image-name' and 'digest' are ignored, since no image overrides are applied. | No       | `default`   |
 
 ## Outputs
 
