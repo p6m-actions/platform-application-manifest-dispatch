@@ -35,7 +35,7 @@ deployment configurations.
 | `update-manifest-token` | Token used to update image manifests                | Yes      |             |
 | `platform-dispatch-url` | URL to dispatch platform updates to                 | Yes      |             |
 | `directory-name`        | Directory name .platform/kubernetes/`directory-name`| Yes      |             |
-| `registry`              | The Docker registry (default, ecr, or other). If not selecting 'default' or 'ecr' image overrides will not be included.         | No       | `default`   |
+| `registry`              | The Docker registry (default, ecr, or other). If 'other' then 'image-name' and 'digest' are ignored, since no image overrides are applied. | No       | `default`   |
 
 ## Outputs
 
