@@ -60,8 +60,8 @@ runs:
           ${{ inputs.platform-dispatch-url }} \
           -d "{\"event_type\": \"update-digest\", \"client_payload\": {\"repository\": \"${{ inputs.repository }}\", \"directory_name\": \"${{ inputs.directory-name }}\", \"image_name\": \"${{ inputs.image-name }}\", \"environment_dir\": \"${{ inputs.environment }}\", \"digest\": \"${{ inputs.digest }}\", \"registry\": \"${{ inputs.registry }}\"}}")
         
-        STATUS=$(echo "$RESPONSE" | jq '.status')
-        MESSAGE=$(echo "$RESPONSE" | jq '.message')
+        STATUS=$(echo "$RESPONSE" | jq -r '.status')
+        MESSAGE=$(echo "$RESPONSE" | jq -r '.message')
         if [ -n "$STATUS" ] && [ "$STATUS" -ge 400 ]; then
           echo "status=failed" >> $GITHUB_OUTPUT
           echo "Failed to dispatch update digest event, status code: $STATUS"
