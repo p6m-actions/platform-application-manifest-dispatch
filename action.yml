@@ -63,7 +63,7 @@ runs:
         STATUS=$(echo "$RESPONSE" | jq -r '.status')
         MESSAGE=$(echo "$RESPONSE" | jq -r '.message')
         if [ -n "$STATUS" ] && [ "$STATUS" -ge 400 ]; then
-          echo "status=failed" >> $GITHUB_OUTPUT
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
           echo "Failed to dispatch update digest event, status code: $STATUS"
           echo "$MESSAGE"
           exit 1
@@ -72,6 +72,31 @@ runs:
         # If the response suceeded, the Github api does not return any content for this HTTP request.
         echo "status=success" >> $GITHUB_OUTPUT
         echo "Successfully dispatched update digest event"
+
+    - name: Publish Step Summary
+      if: always()
+      shell: bash
+      run: |
+        DISPATCH_STATUS="${{ steps.dispatch.outputs.status }}"
+        if [ "$DISPATCH_STATUS" = "success" ]; then
+          STATUS_ICON="✅"
+        else
+          STATUS_ICON="❌"
+        fi
+
+        {
+          echo "## Platform Application Manifest Dispatch"
+          echo ""
+          echo "| Field | Value |"
+          echo "| --- | --- |"
+          echo "| **Status** | ${STATUS_ICON} \`${DISPATCH_STATUS}\` |"
+          echo "| **Repository** | [${{ inputs.repository }}](https://github.com/${{ inputs.repository }}) |"
+          echo "| **Image Name** | \`${{ inputs.image-name }}\` |"
+          echo "| **Directory Name** | \`${{ inputs.directory-name }}\` |"
+          echo "| **Environment** | \`${{ inputs.environment }}\` |"
+          echo "| **Registry** | \`${{ inputs.registry }}\` |"
+          echo "| **Digest** | \`${{ inputs.digest }}\` |"
+        } >> "$GITHUB_STEP_SUMMARY"
 
 # Define the branding for the action in the GitHub Marketplace
 branding:
