@@ -63,7 +63,7 @@ runs:
         STATUS=$(echo "$RESPONSE" | jq -r '.status')
         MESSAGE=$(echo "$RESPONSE" | jq -r '.message')
         if [ -n "$STATUS" ] && [ "$STATUS" -ge 400 ]; then
-          echo "status=failed" >> $GITHUB_OUTPUT
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
           echo "Failed to dispatch update digest event, status code: $STATUS"
           echo "$MESSAGE"
           exit 1
@@ -82,7 +82,6 @@ runs:
           STATUS_ICON="✅"
         else
           STATUS_ICON="❌"
-          DISPATCH_STATUS="failed"
         fi
 
         {
