@@ -73,6 +73,32 @@ runs:
         echo "status=success" >> $GITHUB_OUTPUT
         echo "Successfully dispatched update digest event"
 
+    - name: Publish Step Summary
+      if: always()
+      shell: bash
+      run: |
+        DISPATCH_STATUS="${{ steps.dispatch.outputs.status }}"
+        if [ "$DISPATCH_STATUS" = "success" ]; then
+          STATUS_ICON="✅"
+        else
+          STATUS_ICON="❌"
+          DISPATCH_STATUS="failed"
+        fi
+
+        {
+          echo "## Platform Application Manifest Dispatch"
+          echo ""
+          echo "| Field | Value |"
+          echo "| --- | --- |"
+          echo "| **Status** | ${STATUS_ICON} \`${DISPATCH_STATUS}\` |"
+          echo "| **Repository** | [${{ inputs.repository }}](https://github.com/${{ inputs.repository }}) |"
+          echo "| **Image Name** | \`${{ inputs.image-name }}\` |"
+          echo "| **Directory Name** | \`${{ inputs.directory-name }}\` |"
+          echo "| **Environment** | \`${{ inputs.environment }}\` |"
+          echo "| **Registry** | \`${{ inputs.registry }}\` |"
+          echo "| **Digest** | \`${{ inputs.digest }}\` |"
+        } >> "$GITHUB_STEP_SUMMARY"
+
 # Define the branding for the action in the GitHub Marketplace
 branding:
   icon: "refresh-cw"
