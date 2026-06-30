@@ -20,8 +20,8 @@ deployment configurations.
     directory-name: $(basename ${GITHUB_REPOSITORY})
     environment: "dev"
     digest: ${{ steps.build-image.outputs.digest }}
-    update-manifest-token: ${{ secrets.UPDATE_MANIFEST_TOKEN }}
-    platform-dispatch-url: ${{ vars.PLATFORM_DISPATCH_URL }}
+    update-manifest-token: ${{ secrets.P6M_UPDATE_MANIFEST_TOKEN }}
+    platform-dispatch-url: ${{ vars.P6M_PLATFORM_DISPATCH_URL }}
 ```
 
 ## Inputs
@@ -66,8 +66,8 @@ jobs:
         uses: p6m-actions/docker-repository-login@v1
         with:
           registry: ${{ env.ARTIFACTORY_REGISTRY }}
-          username: ${{ secrets.ARTIFACTORY_USERNAME }}
-          password: ${{ secrets.ARTIFACTORY_IDENTITY_TOKEN }}
+          username: ${{ secrets.P6M_ARTIFACTORY_USERNAME }}
+          password: ${{ secrets.P6M_ARTIFACTORY_IDENTITY_TOKEN }}
 
       - name: Build and Push Docker Image
         id: build-image
@@ -83,6 +83,6 @@ jobs:
           directory-name: $(basename ${GITHUB_REPOSITORY})
           environment: "dev"
           digest: ${{ steps.build-image.outputs.digest }}
-          update-manifest-token: ${{ secrets.UPDATE_MANIFEST_TOKEN }}
-          platform-dispatch-url: ${{ vars.PLATFORM_DISPATCH_URL }}
+          update-manifest-token: ${{ secrets.P6M_UPDATE_MANIFEST_TOKEN }}
+          platform-dispatch-url: ${{ vars.P6M_PLATFORM_DISPATCH_URL }}
 ```
