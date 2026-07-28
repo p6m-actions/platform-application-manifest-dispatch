@@ -36,6 +36,8 @@ deployment configurations.
 | `platform-dispatch-url` | URL to dispatch platform updates to                 | Yes      |             |
 | `directory-name`        | Directory name .platform/kubernetes/`directory-name`| Yes      |             |
 | `registry`              | The Docker registry (default, ecr, or other). If 'other' then 'image-name' and 'digest' are ignored, since no image overrides are applied. | No       | `default`   |
+| `resource-directory-name` | The resource directory name to include in the event payload | No |             |
+| `resource-base-path`    | In-repo directory holding the per-environment folders (e.g. `.platform/kubernetes/<app>`). Overrides the default `.platform/kubernetes` prefix; the environment is still appended. | No |             |
 
 ## Outputs
 
@@ -86,3 +88,32 @@ jobs:
           update-manifest-token: ${{ secrets.P6M_UPDATE_MANIFEST_TOKEN }}
           platform-dispatch-url: ${{ vars.P6M_PLATFORM_DISPATCH_URL }}
 ```
+
+## Monorepo Sub-Applications
+
+By default the dispatch consumer resolves manifests from `.platform/kubernetes/<environment>`,
+which assumes one application per repository. In an app/server monorepo, each sub-application
+needs its own manifest folder. Use `resource-base-path` to override the base prefix so a
+sub-application points at `.platform/kubernetes/<sub-app>/<environment>`:
+
+```yaml
+- name: Update Application Manifest
+  uses: p6m-actions/platform-application-manifest-dispatch@v1
+  with:
+    repository: ${{ github.repository }}
+    image-name: "quality-api"
+    directory-name: "quality-api"
+    environment: "dev"
+    digest: ${{ steps.build-image.outputs.digest }}
+    update-manifest-token: ${{ secrets.P6M_UPDATE_MANIFEST_TOKEN }}
+    platform-dispatch-url: ${{ vars.P6M_PLATFORM_DISPATCH_URL }}
+    # Resolves to .platform/kubernetes/quality-api/dev
+    resource-base-path: ".platform/kubernetes/quality-api"
+```
+
+Notes:
+
+- **Do not include the environment** in `resource-base-path` — the consumer workflow appends it.
+- Omitting the input (or passing an empty string) preserves the default
+  `.platform/kubernetes/<environment>` behavior, so existing single-application callers are
+  unaffected.
