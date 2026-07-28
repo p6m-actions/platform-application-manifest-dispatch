@@ -34,6 +34,10 @@ inputs:
     description: "The resource directory name to include in the event payload"
     required: false
     default: ''
+  resource-base-path:
+    description: "In-repo directory holding the per-environment folders (e.g. .platform/kubernetes/<app>). Overrides the default .platform/kubernetes prefix; the environment is still appended."
+    required: false
+    default: ''
 
 # Define the outputs for this action
 outputs:
@@ -57,13 +61,14 @@ runs:
         echo "Image digest: ${{ inputs.digest }}"
         echo "Registry: ${{ inputs.registry }}"
         echo "Resource Directory Name: ${{ inputs.resource-directory-name }}"
+        echo "Resource Base Path: ${{ inputs.resource-base-path }}"
 
         # Send the repository dispatch event
         RESPONSE=$(curl -X POST \
           -H "Accept: application/vnd.github.everest-preview+json" \
           -H "Authorization: token ${{ inputs.update-manifest-token }}" \
           ${{ inputs.platform-dispatch-url }} \
-          -d "{\"event_type\": \"update-digest\", \"client_payload\": {\"repository\": \"${{ inputs.repository }}\", \"directory_name\": \"${{ inputs.directory-name }}\", \"image_name\": \"${{ inputs.image-name }}\", \"environment_dir\": \"${{ inputs.environment }}\", \"digest\": \"${{ inputs.digest }}\", \"registry\": \"${{ inputs.registry }}\", \"resource_directory_name\": \"${{ inputs.resource-directory-name }}\"}}")
+          -d "{\"event_type\": \"update-digest\", \"client_payload\": {\"repository\": \"${{ inputs.repository }}\", \"directory_name\": \"${{ inputs.directory-name }}\", \"image_name\": \"${{ inputs.image-name }}\", \"environment_dir\": \"${{ inputs.environment }}\", \"digest\": \"${{ inputs.digest }}\", \"registry\": \"${{ inputs.registry }}\", \"resource_directory_name\": \"${{ inputs.resource-directory-name }}\", \"resource_base_path\": \"${{ inputs.resource-base-path }}\"}}")
         
         STATUS=$(echo "$RESPONSE" | jq -r '.status')
         MESSAGE=$(echo "$RESPONSE" | jq -r '.message')
@@ -101,6 +106,7 @@ runs:
           echo "| **Environment** | \`${{ inputs.environment }}\` |"
           echo "| **Registry** | \`${{ inputs.registry }}\` |"
           echo "| **Resource Directory Name** | \`${{ inputs.resource-directory-name }}\` |"
+          echo "| **Resource Base Path** | \`${{ inputs.resource-base-path }}\` |"
           echo "| **Digest** | \`${{ inputs.digest }}\` |"
         } >> "$GITHUB_STEP_SUMMARY"
 
