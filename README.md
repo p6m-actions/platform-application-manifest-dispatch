@@ -38,6 +38,7 @@ deployment configurations.
 | `registry`              | The Docker registry (default, ecr, or other). If 'other' then 'image-name' and 'digest' are ignored, since no image overrides are applied. | No       | `default`   |
 | `resource-directory-name` | The resource directory name to include in the event payload | No |             |
 | `resource-base-path`    | In-repo directory holding the per-environment folders (e.g. `.platform/kubernetes/<app>`). Overrides the default `.platform/kubernetes` prefix; the environment is still appended. | No |             |
+| `ref`                   | Full commit SHA the consumer pins the remote Kustomize base to (`?ref=<sha>`), so a later merge to the app repo can't change what is deployed. When empty, the action uses `github.sha` if the manifests live in the calling repo (`repository` is the calling repo and `resource-directory-name` is empty or names it); otherwise no ref is sent. When promoting a tag, pass the tag's commit. | No |             |
 
 ## Outputs
 
