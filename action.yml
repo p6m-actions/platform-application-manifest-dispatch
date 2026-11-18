@@ -38,6 +38,10 @@ inputs:
     description: "In-repo directory holding the per-environment folders (e.g. .platform/kubernetes/<app>). Overrides the default .platform/kubernetes prefix; the environment is still appended."
     required: false
     default: ''
+  ref:
+    description: "Full commit SHA of the manifest repo to pin the remote Kustomize base to (?ref=). When empty, defaults to the triggering commit if the manifests live in the calling repo; otherwise no ref is sent and the base stays unpinned."
+    required: false
+    default: ''
 
 # Define the outputs for this action
 outputs:
@@ -52,6 +56,10 @@ runs:
     - name: Dispatch Update Image Digest
       id: dispatch
       shell: bash
+      env:
+        INPUT_REF: ${{ inputs.ref }}
+        INPUT_REPOSITORY: ${{ inputs.repository }}
+        RESOURCE_DIRECTORY_NAME: ${{ inputs.resource-directory-name }}
       run: |
         echo "Triggering Update Image Digest..."
         echo "Repository: ${{ inputs.repository }}"
@@ -63,12 +71,27 @@ runs:
         echo "Resource Directory Name: ${{ inputs.resource-directory-name }}"
         echo "Resource Base Path: ${{ inputs.resource-base-path }}"
 
+        # github.sha is only a valid pin when the manifests come from the calling repo.
+        SOURCE_REF="$INPUT_REF"
+        if [ -z "$SOURCE_REF" ] && [ "$INPUT_REPOSITORY" = "$GITHUB_REPOSITORY" ] \
+          && { [ -z "$RESOURCE_DIRECTORY_NAME" ] || [ "$RESOURCE_DIRECTORY_NAME" = "${GITHUB_REPOSITORY#*/}" ]; }; then
+          SOURCE_REF="$GITHUB_SHA"
+        fi
+        echo "Source Ref: ${SOURCE_REF:-<none, base stays unpinned>}"
+        echo "source_ref=${SOURCE_REF}" >> $GITHUB_OUTPUT
+
+        if [ -n "$SOURCE_REF" ] && ! [[ "$SOURCE_REF" =~ ^[0-9a-f]{40}$ ]]; then
+          echo "status=invalid-ref" >> $GITHUB_OUTPUT
+          echo "ref must be a full 40-character commit SHA or empty"
+          exit 1
+        fi
+
         # Send the repository dispatch event
         RESPONSE=$(curl -X POST \
           -H "Accept: application/vnd.github.everest-preview+json" \
           -H "Authorization: token ${{ inputs.update-manifest-token }}" \
           ${{ inputs.platform-dispatch-url }} \
-          -d "{\"event_type\": \"update-digest\", \"client_payload\": {\"repository\": \"${{ inputs.repository }}\", \"directory_name\": \"${{ inputs.directory-name }}\", \"image_name\": \"${{ inputs.image-name }}\", \"environment_dir\": \"${{ inputs.environment }}\", \"digest\": \"${{ inputs.digest }}\", \"registry\": \"${{ inputs.registry }}\", \"resource_directory_name\": \"${{ inputs.resource-directory-name }}\", \"resource_base_path\": \"${{ inputs.resource-base-path }}\"}}")
+          -d "{\"event_type\": \"update-digest\", \"client_payload\": {\"repository\": \"${{ inputs.repository }}\", \"directory_name\": \"${{ inputs.directory-name }}\", \"image_name\": \"${{ inputs.image-name }}\", \"environment_dir\": \"${{ inputs.environment }}\", \"digest\": \"${{ inputs.digest }}\", \"registry\": \"${{ inputs.registry }}\", \"resource_directory_name\": \"${{ inputs.resource-directory-name }}\", \"resource_base_path\": \"${{ inputs.resource-base-path }}\", \"ref\": \"${SOURCE_REF}\"}}")
         
         STATUS=$(echo "$RESPONSE" | jq -r '.status')
         MESSAGE=$(echo "$RESPONSE" | jq -r '.message')
@@ -107,6 +130,7 @@ runs:
           echo "| **Registry** | \`${{ inputs.registry }}\` |"
           echo "| **Resource Directory Name** | \`${{ inputs.resource-directory-name }}\` |"
           echo "| **Resource Base Path** | \`${{ inputs.resource-base-path }}\` |"
+          echo "| **Source Ref** | \`${{ steps.dispatch.outputs.source_ref }}\` |"
           echo "| **Digest** | \`${{ inputs.digest }}\` |"
         } >> "$GITHUB_STEP_SUMMARY"
 
